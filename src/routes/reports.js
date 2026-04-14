@@ -1,0 +1,216 @@
+const express = require('express');
+const router  = express.Router();
+const Order   = require('../models/Order');
+const Inventory = require('../models/Inventory');
+const Settings = require('../models/Settings');
+const nodemailer = require('nodemailer');
+const { getCache, setCache } = require('../lib/redis');
+
+const REPORT_SUMMARY_CACHE_KEY = 'reports:daily-summary';
+
+function getTodayBounds() {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start, end };
+}
+
+async function getPersistedSettings() {
+  const existing = await Settings.findOne();
+  return existing || Settings.create({});
+}
+
+function resolveEmailConfig(persisted, incoming = {}) {
+  const authEmail =
+    process.env.SMTP_USER ||
+    process.env.GMAIL_SENDER ||
+    incoming.authEmail ||
+    persisted?.senderEmail ||
+    '';
+
+  return {
+    authEmail,
+    senderEmail: incoming.senderEmail || persisted?.senderEmail || authEmail,
+    senderPassword: incoming.senderPassword || persisted?.senderPassword || process.env.GMAIL_APP_PASSWORD || '',
+    adminEmail: incoming.adminEmail || persisted?.adminEmail || process.env.ADMIN_EMAIL || '',
+  };
+}
+
+function createTransport(emailConfig) {
+  if (process.env.SMTP_HOST) {
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: emailConfig.authEmail,
+        pass: emailConfig.senderPassword,
+      },
+    });
+  }
+
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailConfig.authEmail,
+      pass: emailConfig.senderPassword,
+    },
+  });
+}
+
+// ── Build the HTML email report ──────────────────────────────────
+function buildReportHTML({ date, orders, settings, inventory }) {
+  const total   = orders.reduce((s,o)=>s+o.grandTotal,0);
+  const paid    = orders.reduce((s,o)=>s+(o.paidAmount||o.grandTotal),0);
+  const due     = orders.reduce((s,o)=>s+(o.dueAmount||0),0);
+  const pmMap   = {};
+  orders.forEach(o=>{ pmMap[o.paymentMode]=(pmMap[o.paymentMode]||0)+o.grandTotal; });
+  const itemMap = {};
+  orders.forEach(o=>o.items?.forEach(i=>{ itemMap[i.name]=(itemMap[i.name]||0)+i.quantity; }));
+  const topItems = Object.entries(itemMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const lowStock = inventory.filter(i=>i.stock<=i.minStock);
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<style>
+  body{font-family:Inter,Arial,sans-serif;background:#0B0D12;color:#EEF0F8;margin:0;padding:0}
+  .wrap{max-width:600px;margin:0 auto;padding:20px}
+  .header{background:linear-gradient(135deg,#F59E0B,#D97706);border-radius:12px;padding:24px;text-align:center;margin-bottom:20px}
+  .header h1{margin:0;font-size:22px;font-weight:900;color:#000;font-family:'Pacifico',cursive}
+  .header p{margin:4px 0 0;font-size:13px;color:#00000080}
+  .kpi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+  .kpi{background:#111318;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;text-align:center}
+  .kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:#9096B0;margin-bottom:5px;font-weight:600}
+  .kpi-value{font-size:20px;font-weight:800;font-family:monospace}
+  .kpi-green{color:#10B981}.kpi-amber{color:#F59E0B}.kpi-red{color:#EF4444}.kpi-blue{color:#3B82F6}
+  .section{background:#111318;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;margin-bottom:14px}
+  .section h3{font-size:13px;font-weight:700;margin:0 0 12px;color:#9096B0;text-transform:uppercase;letter-spacing:0.06em}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{padding:6px 10px;text-align:left;color:#9096B0;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid rgba(255,255,255,0.06)}
+  td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:#EEF0F8}
+  tr:last-child td{border-bottom:none}
+  .badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700}
+  .low{background:rgba(239,68,68,0.12);color:#EF4444}
+  .ok{background:rgba(16,185,129,0.12);color:#10B981}
+  .footer{text-align:center;font-size:11px;color:#525870;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)}
+  .alert-box{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#EF4444}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>${settings.restaurantName||'HumTum'}</h1>
+    <p>Daily Sales Report · ${new Date(date).toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value kpi-amber">${settings.currency||'₹'}${total.toFixed(0)}</div></div>
+    <div class="kpi"><div class="kpi-label">Orders</div><div class="kpi-value kpi-green">${orders.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Pending Dues</div><div class="kpi-value kpi-red">${settings.currency||'₹'}${due.toFixed(0)}</div></div>
+  </div>
+
+  ${due>0?`<div class="alert-box">⚠️ <b>${settings.currency||'₹'}${due.toFixed(2)}</b> in outstanding dues — follow up with customers.</div>`:''}
+
+  <div class="section">
+    <h3>📊 Payment Breakdown</h3>
+    <table><thead><tr><th>Mode</th><th>Amount</th><th>Share</th></tr></thead><tbody>
+      ${Object.entries(pmMap).map(([mode,amt])=>`<tr><td>${mode.toUpperCase()}</td><td style="font-family:monospace">${settings.currency||'₹'}${amt.toFixed(2)}</td><td>${total>0?((amt/total)*100).toFixed(0):0}%</td></tr>`).join('')}
+    </tbody></table>
+  </div>
+
+  <div class="section">
+    <h3>🏆 Top 5 Selling Items</h3>
+    <table><thead><tr><th>#</th><th>Item</th><th>Qty Sold</th></tr></thead><tbody>
+      ${topItems.length===0?'<tr><td colspan="3" style="text-align:center;color:#525870">No sales today</td></tr>':topItems.map(([name,qty],i)=>`<tr><td style="color:#F59E0B;font-weight:700">${i+1}</td><td>${name}</td><td style="font-family:monospace;font-weight:700">${qty}</td></tr>`).join('')}
+    </tbody></table>
+  </div>
+
+  ${inventory.length>0?`<div class="section">
+    <h3>📦 Inventory Status (${inventory.length} items)</h3>
+    ${lowStock.length>0?`<div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:7px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#EF4444"><b>Low Stock Alert:</b> ${lowStock.map(i=>i.name).join(', ')}</div>`:''}
+    <table><thead><tr><th>Item</th><th>Stock</th><th>Min</th><th>Status</th></tr></thead><tbody>
+      ${inventory.slice(0,10).map(i=>`<tr><td>${i.name}</td><td style="font-family:monospace">${i.stock} ${i.unit}</td><td style="font-family:monospace;color:#525870">${i.minStock}</td><td><span class="badge ${i.stock<=i.minStock?'low':'ok'}">${i.stock<=i.minStock?'Low Stock':'OK'}</span></td></tr>`).join('')}
+    </tbody></table>
+  </div>`:''}
+
+  <div class="section">
+    <h3>📋 Today's Orders (${orders.length})</h3>
+    <table><thead><tr><th>Bill No</th><th>Table</th><th>Amount</th><th>Mode</th></tr></thead><tbody>
+      ${orders.slice(0,15).map(o=>`<tr><td style="font-family:monospace">HTG-${o.billNo}</td><td>T${o.tableNo}</td><td style="font-family:monospace">${settings.currency||'₹'}${o.grandTotal.toFixed(2)}</td><td>${o.paymentMode?.toUpperCase()}</td></tr>`).join('')}
+      ${orders.length>15?`<tr><td colspan="4" style="text-align:center;color:#525870">+${orders.length-15} more orders</td></tr>`:''}
+    </tbody></table>
+  </div>
+
+  <div class="footer">
+    Auto-generated by ${settings.restaurantName||'HumTum'}<br/>
+    ${settings.address||''} · GSTIN: ${settings.gstin||''}
+  </div>
+</div>
+</body>
+</html>`;
+}
+router.post('/send-daily', async (req, res) => {
+  const { emailConfig, settings, inventory } = req.body;
+  const persistedSettings = await getPersistedSettings();
+  const resolvedEmailConfig = resolveEmailConfig(persistedSettings, emailConfig);
+  const resolvedSettings = {
+    ...persistedSettings.toObject(),
+    ...settings,
+    restaurantName: settings?.restaurantName || persistedSettings.restaurantName || process.env.RESTAURANT_NAME || 'HumTum',
+    currency: settings?.currency || persistedSettings.currency || '₹',
+  };
+  const resolvedInventory = Array.isArray(inventory) && inventory.length > 0
+    ? inventory
+    : await Inventory.find().sort({ category: 1, name: 1 });
+
+  if (!resolvedEmailConfig.authEmail || !resolvedEmailConfig.senderPassword || !resolvedEmailConfig.adminEmail) {
+    return res.status(400).json({ error: 'Email configuration incomplete. Set mail auth credentials on the server and provide admin email.' });
+  }
+
+  try {
+    const { start, end } = getTodayBounds();
+    const orders = await Order.find({ date: { $gte: start, $lt: end } });
+
+    const html = buildReportHTML({ date: start, orders, settings: resolvedSettings, inventory: resolvedInventory });
+
+    const transporter = createTransport(resolvedEmailConfig);
+    await transporter.verify();
+
+    await transporter.sendMail({
+      from:    `"${resolvedSettings.restaurantName || 'HumTum POS'}" <${resolvedEmailConfig.senderEmail}>`,
+      replyTo: resolvedEmailConfig.senderEmail,
+      to:      resolvedEmailConfig.adminEmail,
+      subject: `📊 Daily Report — ${resolvedSettings.restaurantName || 'HumTum'} — ${new Date().toLocaleDateString('en-IN')}`,
+      html,
+    });
+
+    res.json({ success:true, message:`Report sent to ${resolvedEmailConfig.adminEmail}`, ordersCount:orders.length });
+  } catch (err) {
+    console.error('Email error:', err.message);
+    res.status(500).json({ error: err.message || 'Failed to send email.' });
+  }
+});
+
+router.get('/daily-summary', async (req, res) => {
+  try {
+    const cached = await getCache(REPORT_SUMMARY_CACHE_KEY);
+    if (cached) return res.json(cached);
+
+    const { start, end } = getTodayBounds();
+    const orders = await Order.find({ date: { $gte: start, $lt: end } });
+    const total    = orders.reduce((s,o)=>s+o.grandTotal,0);
+    const due      = orders.reduce((s,o)=>s+(o.dueAmount||0),0);
+    const pmMap    = {};
+    orders.forEach(o=>{ pmMap[o.paymentMode]=(pmMap[o.paymentMode]||0)+o.grandTotal; });
+    const summary = { ordersCount:orders.length, revenue:total, due, paymentBreakdown:pmMap, date:start };
+    await setCache(REPORT_SUMMARY_CACHE_KEY, summary, 120);
+    res.json(summary);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;
