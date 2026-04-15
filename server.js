@@ -78,7 +78,17 @@ async function startServer() {
     console.log('✅ MongoDB connected');
 
     const redisClient = await connectRedis();
-    console.log(redisClient?.isReady ? '✅ Redis ready' : '⚠️ Redis fallback');
+
+try {
+  if (redisClient) {
+    await redisClient.set('test', 'ok');
+    console.log('✅ Redis working');
+  } else {
+    console.log('⚠️ Redis fallback');
+  }
+} catch {
+  console.log('⚠️ Redis fallback');
+}
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);

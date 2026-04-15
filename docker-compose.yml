@@ -1,25 +1,26 @@
-services:
-  redis:
-    image: redis:7-alpine
-    container_name: humtum-redis
-    restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
-    expose:
-      - "6379"
+version: "3.9"
 
+services:
   app:
     build:
       context: .
     container_name: humtum-pos
     restart: unless-stopped
+
     env_file:
       - .env
+
     environment:
       NODE_ENV: production
       PORT: 3000
-      REDIS_URL: redis://redis:6379
       NODE_OPTIONS: "--dns-result-order=ipv4first"
-    depends_on:
-      - redis
+
     ports:
       - "3000:3000"
+
+    # optional but good practice
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

@@ -1,61 +1,49 @@
-const { createClient } = require('redis');
+const { Redis } = require('@upstash/redis');
 
-let client;
+let client = null;
 
 /**
- * Create Redis Client
+ * Create Redis Client (Upstash)
  */
 function createRedisClient() {
-  const url = process.env.REDIS_URL;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  if (!url) {
-    console.log('⚠️ REDIS_URL not set → Redis disabled');
+  if (!url || !token) {
+    console.log('⚠️ Upstash Redis not configured → Redis disabled');
     return null;
   }
 
-  const c = createClient({
+  console.log('🔌 Upstash Redis initialized');
+
+  return new Redis({
     url,
-    socket: {
-      reconnectStrategy: (retries) => {
-        if (retries > 5) return false;
-        return Math.min(retries * 300, 3000);
-      },
-    },
+    token,
   });
-
-  c.on('connect', () => console.log('🔌 Redis connecting...'));
-  c.on('ready', () => console.log('✅ Redis ready'));
-  c.on('error', (err) => console.log('❌ Redis error:', err.message));
-  c.on('end', () => console.log('⚠️ Redis connection closed'));
-
-  return c;
 }
 
 /**
- * Connect Redis (safe singleton)
+ * Connect Redis (no real connection needed in Upstash)
  */
 async function connectRedis() {
-  if (client?.isReady) return client;
+  if (client) return client;
 
   try {
     client = createRedisClient();
-    if (!client) return null;
-
-    await client.connect();
     return client;
   } catch (err) {
-    console.error('❌ Redis connect failed:', err.message);
+    console.error('❌ Redis init failed:', err.message);
     client = null;
     return null;
   }
 }
 
 /**
- * Health check (FIXED)
+ * Health check
  */
 async function isRedisHealthy() {
   try {
-    if (!client?.isReady) return false;
+    if (!client) return false;
 
     const pong = await client.ping();
     return pong === 'PONG';
@@ -69,7 +57,8 @@ async function isRedisHealthy() {
  */
 async function getCache(key) {
   try {
-    if (!client?.isReady) return null;
+    if (!client) return null;
+
     const val = await client.get(key);
     return val ? JSON.parse(val) : null;
   } catch (e) {
@@ -82,10 +71,10 @@ async function getCache(key) {
  */
 async function setCache(key, value, ttl = 300) {
   try {
-    if (!client?.isReady) return;
+    if (!client) return;
 
     await client.set(key, JSON.stringify(value), {
-      EX: ttl,
+      ex: ttl, // ⚠️ lowercase 'ex' in Upstash
     });
   } catch (e) {}
 }
@@ -95,7 +84,8 @@ async function setCache(key, value, ttl = 300) {
  */
 async function deleteCache(key) {
   try {
-    if (!client?.isReady) return;
+    if (!client) return;
+
     await client.del(key);
   } catch (e) {}
 }
