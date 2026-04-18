@@ -4,7 +4,6 @@
   "description": "HumTum Bar & Club POS – Express + MongoDB",
   "main": "server.js",
   "scripts": {
-    "postinstall": "npm --prefix frontend install",
     "build": "npm --prefix frontend run build",
     "start": "node server.js",
     "dev": "nodemon server.js",
