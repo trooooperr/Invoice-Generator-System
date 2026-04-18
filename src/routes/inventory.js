@@ -36,6 +36,7 @@ router.get('/:id', async (req, res) => {
 // CREATE INVENTORY ITEM (auto-create menu item)
 router.post('/', async (req, res) => {
   try {
+    const { name, category, unit, stock, minStock, price, imageUrl } = req.body;
     // Create inventory item
     const invItem = new Inventory({
       name,
@@ -44,7 +45,7 @@ router.post('/', async (req, res) => {
       stock,
       minStock,
       price,
-      imageUrl: req.body.imageUrl || ''
+      imageUrl: imageUrl || ''
     });
     const savedInv = await invItem.save();
 

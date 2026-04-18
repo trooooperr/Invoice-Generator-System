@@ -8,6 +8,7 @@ const { connectRedis, setCache } = require('./src/lib/redis');
 const Settings = require('./src/models/Settings');
 const { seedDefaultUsers } = require('./src/routes/auth');
 const { sendDailyReportInternal } = require('./src/routes/reports');
+const { seedIMSData } = require('./src/lib/seeder');
 
 const PORT = process.env.PORT || 3000;
 const REPORT_TIME = process.env.REPORT_CRON || '55 23 * * *';
@@ -69,6 +70,7 @@ async function startServer() {
     console.log('✅ MongoDB connected');
 
     await seedDefaultUsers();
+    await seedIMSData();
     await connectRedis();
     await warmupCache();
 

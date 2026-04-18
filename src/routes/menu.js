@@ -29,7 +29,7 @@ router.post('/sync', async (req, res) => {
         {
           name: inv.name,
           category: inv.category,
-          price: inv.sellingPrice || inv.costPrice,
+          price: inv.price || 0,
           available: inv.stock > 0,
         },
         { upsert: true, new: true, setDefaultsOnInsert: true }
@@ -44,7 +44,8 @@ router.post('/sync', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const item = new MenuItem(req.body);
+    const { name, category, price, available, imageUrl } = req.body;
+    const item = new MenuItem({ name, category, price, available, imageUrl });
     const saved = await item.save();
     await deleteCache(MENU_CACHE_KEY);
     res.status(201).json(saved);
