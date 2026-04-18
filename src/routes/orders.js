@@ -57,8 +57,9 @@ router.post('/', async (req, res) => {
       return await client.incr(redisCounterKey);
     })();
     
-    // Format: HTB-001
-    orderData.billNo = `HTB-${count.toString().padStart(3, '0')}`;
+    // Format: HTB-001 (Ensures no double prefixing)
+    const formattedCount = count.toString().padStart(3, '0');
+    orderData.billNo = `HTB-${formattedCount}`;
 
     const order = new Order(orderData);
     const saved = await order.save();

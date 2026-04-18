@@ -200,8 +200,10 @@ export default function InventoryPage() {
     }
   }
 
+  const DRINK_CATS = ['Alcohol', 'Beverages', 'Cans', 'Packed Items', 'Soft Drinks', 'Beer', 'Liquor', 'Energy Drinks', 'Cold Drinks'];
   const filtered = inventory.filter(i =>
     i.name && i.name.toLowerCase().includes(search.toLowerCase()) &&
+    DRINK_CATS.includes(i.category) &&
     (cat==='All' || i.category===cat)
   );
 
