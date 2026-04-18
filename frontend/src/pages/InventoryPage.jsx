@@ -21,7 +21,7 @@ function StockModal({ item, onClose, onSave }) {
     ? settings.inventoryCategories
     : ['General'];
   const [form, setForm] = useState(item || {
-    name:'', category: categories[0] || '', unit:'Bottles', stock:0, minStock:5, price:''
+    name:'', category: categories[0] || '', unit:'Bottles', stock:0, minStock:5, price:'', imageUrl:''
   });
   const [error, setError] = useState(null);
 
@@ -93,6 +93,11 @@ function StockModal({ item, onClose, onSave }) {
         <div className="fgroup">
           <label className="lbl">Price</label>
           <input type="number" value={form.price} onChange={e=>set('price',e.target.value)} />
+        </div>
+
+        <div className="fgroup">
+          <label className="lbl">Image URL</label>
+          <input value={form.imageUrl} onChange={e=>set('imageUrl',e.target.value)} placeholder="https://..." />
         </div>
 
         {error && <div style={{color:'red',marginBottom:8}}>{error}</div>}

@@ -36,7 +36,6 @@ router.get('/:id', async (req, res) => {
 // CREATE INVENTORY ITEM (auto-create menu item)
 router.post('/', async (req, res) => {
   try {
-    const { name, category, unit, stock, minStock, price } = req.body;
     // Create inventory item
     const invItem = new Inventory({
       name,
@@ -44,20 +43,11 @@ router.post('/', async (req, res) => {
       unit,
       stock,
       minStock,
-      price
+      price,
+      imageUrl: req.body.imageUrl || ''
     });
     const savedInv = await invItem.save();
-    // Upsert menu item
-    await MenuItem.findOneAndUpdate(
-      { name },
-      {
-        name,
-        category,
-        price,
-        available: stock > 0,
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+
     await deleteCache([INVENTORY_CACHE_KEY, MENU_CACHE_KEY]);
     res.status(201).json(savedInv);
   } catch (err) {
@@ -75,17 +65,7 @@ router.put('/:id', async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!updated) return res.status(404).json({ message: 'Item not found' });
-    // Also update menu item
-    await MenuItem.findOneAndUpdate(
-      { name: updated.name },
-      {
-        name: updated.name,
-        category: updated.category,
-        price: updated.price,
-        available: updated.stock > 0,
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+
     await deleteCache([INVENTORY_CACHE_KEY, MENU_CACHE_KEY]);
     res.json(updated);
   } catch (err) {

@@ -143,7 +143,7 @@ function PayModal({ total, currency, onClose, onConfirm }) {
 }
 
 export default function BillingPage() {
-  const { tableBills, activeTableId, selectTable, updateTableItem, clearTable, setTableField, billTotals, filteredMenu, categories, categoryFilter, setCategoryFilter, menuSearch, setMenuSearch, menuItems, inventory, getTableStatus, generateBill, settings, NUM_TABLES } = useApp();
+  const { tableBills, activeTableId, selectTable, updateTableItem, clearTable, setTableField, billTotals, allSellableItems, filteredMenu, categories, categoryFilter, setCategoryFilter, menuSearch, setMenuSearch, inventory, getTableStatus, generateBill, settings, NUM_TABLES } = useApp();
   const [pm, setPm] = useState('cash');
   const [payModal, setPayModal] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -196,12 +196,12 @@ export default function BillingPage() {
 
           <div className="items-grid-modern">
             {filteredMenu.map(item=>{
-              const stockItem = inventory?.find(inv => inv.name.toLowerCase().trim() === item.name.toLowerCase().trim());
-              return (
-                <MenuItem key={item._id} item={item} qty={table.items.find(i=>i._id===item._id)?.quantity||0}
-                  stock={stockItem?.stock}
-                  add={(id,a)=>updateTableItem(activeTableId,id,a,menuItems)}
-                  rem={(id,a)=>updateTableItem(activeTableId,id,a,menuItems)}/>
+               const dbStock = item.isInventory ? item.stock : inventory?.find(inv => inv.name.toLowerCase().trim() === item.name.toLowerCase().trim())?.stock;
+               return (
+                 <MenuItem key={item._id} item={item} qty={table.items.find(i=>i._id===item._id)?.quantity||0}
+                   stock={dbStock}
+                   add={(id,a)=>updateTableItem(activeTableId,id,a,allSellableItems)}
+                   rem={(id,a)=>updateTableItem(activeTableId,id,a,allSellableItems)}/>
               );
             })}
           </div>
@@ -414,8 +414,9 @@ export default function BillingPage() {
 }
 
         .mcard-modern { background: var(--s1); border-radius: 16px; overflow: hidden; border: 1px solid var(--b1); display: flex; flex-direction: column; }
-        .mimg-container { position: relative; aspect-ratio: 1/1; width: 100%; background: #000; }
-        .mimg-big { width: 100%; height: 100%; object-fit: cover; }
+        .mimg-container { position: relative; width: 100%; height: 130px; background: var(--s2); overflow: hidden; }
+        .mimg-big { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .mcard-modern:hover .mimg-big { transform: scale(1.1); }
         .m-gradient-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%); display: flex; align-items: flex-end; padding: 8px; }
         .m-price-tag { background: var(--a); color: #000; font-size: 12px; font-weight: 900; padding: 2px 8px; border-radius: 6px; }
         .mname-modern { font-size: 12px; font-weight: 800; padding: 10px 10px 5px; color: var(--t0); height: 38px; overflow: hidden; line-height: 1.2; }

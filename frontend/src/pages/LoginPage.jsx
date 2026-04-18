@@ -285,6 +285,48 @@ export default function LoginPage() {
         <p style={{ textAlign:'center', fontSize:10, color:'var(--t2)', marginTop:14 }}>
           © {new Date().getFullYear()} {settings.restaurantName}
         </p>
+
+        {/* --- QUICK ACCESS / INTERVIEW MODE --- */}
+        <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px dashed var(--b1)' }}>
+          <div style={{ fontSize: 9, fontWeight: 900, color: 'var(--amber)', letterSpacing: 1, marginBottom: 12, textAlign: 'center' }}>
+            DEMO MODE / QUICK ACCESS
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+            {/* OWNER BUTTON */}
+            <button 
+              type="button" 
+              className="btn btn-ghost" 
+              style={{ padding: '12px 6px', height: 'auto', flexDirection: 'column', gap: 6, background:'rgba(245,158,11,0.03)', border:'1px solid rgba(245,158,11,0.1)' }}
+              onClick={() => quick('admin', 'admin123')}
+            >
+              <Lock size={16} style={{ color: 'var(--amber)' }}/>
+              <div style={{ fontSize: 10, fontWeight: 800 }}>ADMIN</div>
+            </button>
+
+            {/* MANAGER BUTTON */}
+            <button 
+              type="button" 
+              className="btn btn-ghost" 
+              style={{ padding: '12px 6px', height: 'auto', flexDirection: 'column', gap: 6, background:'rgba(59,130,246,0.03)', border:'1px solid rgba(59,130,246,0.1)' }}
+              onClick={() => quick('manager', 'manager123')}
+            >
+              <ShieldCheck size={16} style={{ color: '#3B82F6' }}/>
+              <div style={{ fontSize: 10, fontWeight: 800 }}>MANAGER</div>
+            </button>
+
+            {/* STAFF BUTTON */}
+            <button 
+              type="button" 
+              className="btn btn-ghost" 
+              style={{ padding: '12px 6px', height: 'auto', flexDirection: 'column', gap: 6, background:'rgba(16,185,129,0.03)', border:'1px solid rgba(16,185,129,0.1)' }}
+              onClick={() => quick('staff', 'staff123')}
+            >
+              <User size={16} style={{ color: '#10B981' }}/>
+              <div style={{ fontSize: 10, fontWeight: 800 }}>STAFF</div>
+            </button>
+          </div>
+        </div>
       </div>
     <style>{`
 /* PAGE WRAPPER */

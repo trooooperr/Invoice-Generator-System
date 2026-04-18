@@ -168,7 +168,12 @@ export function AppProvider({ children }) {
   const [inventory,    setInventory]    = useState(() => {
     try { return JSON.parse(localStorage.getItem(INVENTORY_CACHE)) || []; } catch { return []; }
   });
-  const [loading,      setLoading]      = useState(true);
+  const [loading,      setLoading]      = useState(() => {
+    // If we have cached menu or inventory, don't show the initial full-page loader
+    const mc = localStorage.getItem(MENU_CACHE);
+    const ic = localStorage.getItem(INVENTORY_CACHE);
+    return !(mc && ic);
+  });
   const [error,        setError]        = useState(null);
 
   // ── Tables — persist to localStorage ────────────────────────────
@@ -269,7 +274,11 @@ export function AppProvider({ children }) {
   // ── Data loading (with Promise.allSettled for resilience) ──────
   // ── Data loading (with Promise.allSettled for resilience) ──────
   const loadData = useCallback(async (isSilent = false) => {
-    if (!isSilent) setLoading(true);
+    // Determine if we should show top loader or full loader
+    const hasCache = localStorage.getItem(MENU_CACHE) && localStorage.getItem(INVENTORY_CACHE);
+    const silent = isSilent || hasCache;
+
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const results = await Promise.allSettled([
@@ -284,24 +293,33 @@ export function AppProvider({ children }) {
       const workersData   = results[2].status === 'fulfilled' ? results[2].value : [];
       const inventoryData = results[3].status === 'fulfilled' ? results[3].value : [];
 
-      setMenuItems(menuData);
-      setOrderHistory([...ordersData].sort((a,b) => new Date(b.date)-new Date(a.date)));
-      setWorkers(workersData);
-      setInventory(inventoryData);
+      if (results[0].status === 'fulfilled') {
+        setMenuItems(menuData);
+        localStorage.setItem(MENU_CACHE, JSON.stringify(menuData));
+      }
+      if (results[1].status === 'fulfilled') {
+        setOrderHistory([...ordersData].sort((a,b) => new Date(b.date)-new Date(a.date)));
+      }
+      if (results[2].status === 'fulfilled') {
+        setWorkers(workersData);
+        localStorage.setItem(WORKERS_CACHE, JSON.stringify(workersData));
+      }
+      if (results[3].status === 'fulfilled') {
+        setInventory(inventoryData);
+        localStorage.setItem(INVENTORY_CACHE, JSON.stringify(inventoryData));
+      }
 
-      localStorage.setItem(MENU_CACHE, JSON.stringify(menuData));
-      localStorage.setItem(WORKERS_CACHE, JSON.stringify(workersData));
-      localStorage.setItem(INVENTORY_CACHE, JSON.stringify(inventoryData));
-
-      // Check if any failed
-      const failed = results.filter(r => r.status === 'rejected');
-      if (failed.length > 0 && !isSilent) {
-        setError('Some data failed to load. Try refreshing.');
+      // Check if all essential sectors failed
+      const totalFailed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.length === 0 && !hasCache)).length;
+      if (totalFailed === results.length && !silent) {
+        setError('Complete data sync failed. Try refreshing.');
       }
     } catch (err) {
-      if (!isSilent) setError('Failed to load data. Please retry.');
+      if (!silent) setError('Failed to load data. Please retry.');
     } finally {
-      if (!isSilent) setLoading(false);
+      if (!silent) setLoading(false);
+      // Always ensure loading is false if we have ANY cache
+      if (hasCache) setLoading(false);
     }
   }, []);
 
@@ -356,20 +374,30 @@ export function AppProvider({ children }) {
     return { subtotal, sgst, cgst, discountAmount, grandTotal, roundOff };
   }, [tableBills, activeTableId, settings]);
 
-  // ── Filtered menu ────────────────────────────────────────────────
+  // ── Combined & Filtered menu ──────────────────────────────────
+  const allSellableItems = useMemo(() => {
+    const menu = Array.isArray(menuItems) ? menuItems : [];
+    const inv  = Array.isArray(inventory) ? inventory : [];
+    // Drinks from inventory are sellable if they have stock
+    const drinkItems = inv.map(i => ({ 
+      ...i, 
+      available: i.stock > 0, 
+      isInventory: true 
+    }));
+    return [...menu, ...drinkItems];
+  }, [menuItems, inventory]);
+
   const filteredMenu = useMemo(() => {
-    if (!Array.isArray(menuItems)) return [];
-    return menuItems.filter(item => {
+    return allSellableItems.filter(item => {
       const mc = categoryFilter === 'All' || item.category === categoryFilter;
       const ms = item.name.toLowerCase().includes(menuSearch.toLowerCase());
       return mc && ms;
     });
-  }, [menuItems, categoryFilter, menuSearch]);
+  }, [allSellableItems, categoryFilter, menuSearch]);
 
   const categories = useMemo(() => {
-    if (!Array.isArray(menuItems)) return ['All'];
-    return ['All', ...new Set(menuItems.map(i => i.category))];
-  }, [menuItems]);
+    return ['All', ...new Set(allSellableItems.map(i => i.category))];
+  }, [allSellableItems]);
 
   const getTableStatus = useCallback((tableId) => {
     const t = tableBills[tableId];
@@ -512,7 +540,7 @@ export function AppProvider({ children }) {
       loading, error, loadData,
       tableBills, activeTableId, selectTable,
       updateTableItem, clearTable, setTableField,
-      billTotals, filteredMenu, categories,
+      billTotals, allSellableItems, filteredMenu, categories,
       categoryFilter, setCategoryFilter,
       menuSearch, setMenuSearch,
       getTableStatus, generateBill, settleOrder,
