@@ -228,9 +228,9 @@ export default function BillingPage() {
                 <div key={item._id} className="b-item-row">
                   <span className="b-item-name">{item.name}</span>
                   <div className="b-item-ctrl">
-                    <button onClick={()=>updateTableItem(activeTableId,item._id,'decrease',menuItems)}>−</button>
+                    <button onClick={()=>updateTableItem(activeTableId,item._id,'decrease',allSellableItems)}>−</button>
                     <span>{item.quantity}</span>
-                    <button onClick={()=>updateTableItem(activeTableId,item._id,'increase',menuItems)}>+</button>
+                    <button onClick={()=>updateTableItem(activeTableId,item._id,'increase',allSellableItems)}>+</button>
                   </div>
                   <span className="b-item-price">{c}{(item.price*item.quantity).toFixed(0)}</span>
                 </div>
@@ -923,8 +923,8 @@ export default function BillingPage() {
 }
 .stock-badge {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
+  top: 10px;
+  right: 10px;
   padding: 3px 8px;
   border-radius: 6px;
   font-size: 10px;

@@ -158,25 +158,48 @@ export function AppProvider({ children }) {
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
 
   // ── Data ────────────────────────────────────────────────────────
-  const [menuItems,    setMenuItems]    = useState(() => {
+  // ── Persistent Setters ──────────────────────────────────────────
+  const [menuItems, _setMenuItems] = useState(() => {
     try { return JSON.parse(localStorage.getItem(MENU_CACHE)) || []; } catch { return []; }
   });
-  const [orderHistory, setOrderHistory] = useState([]);
-  const [workers,      setWorkers]      = useState(() => {
+  const setMenuItems = useCallback((updater) => {
+    _setMenuItems(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      localStorage.setItem(MENU_CACHE, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const [workers, _setWorkers] = useState(() => {
     try { return JSON.parse(localStorage.getItem(WORKERS_CACHE)) || []; } catch { return []; }
   });
-  const [inventory,    setInventory]    = useState(() => {
+  const setWorkers = useCallback((updater) => {
+    _setWorkers(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      localStorage.setItem(WORKERS_CACHE, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const [inventory, _setInventory] = useState(() => {
     try { return JSON.parse(localStorage.getItem(INVENTORY_CACHE)) || []; } catch { return []; }
   });
+  const setInventory = useCallback((updater) => {
+    _setInventory(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      localStorage.setItem(INVENTORY_CACHE, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const [orderHistory, setOrderHistory] = useState([]);
   const [loading,      setLoading]      = useState(() => {
-    // If we have cached menu or inventory, don't show the initial full-page loader
     const mc = localStorage.getItem(MENU_CACHE);
     const ic = localStorage.getItem(INVENTORY_CACHE);
     return !(mc && ic);
   });
   const [error,        setError]        = useState(null);
 
-  // ── Tables — persist to localStorage ────────────────────────────
   const [tableBills, _setTableBills] = useState(loadTableBills);
   const setTableBills = useCallback((updater) => {
     _setTableBills(prev => {
@@ -444,6 +467,18 @@ export function AppProvider({ children }) {
       const saved = await res.json();
       setOrderHistory(prev => [saved, ...(Array.isArray(prev)?prev:[])]);
       setInvoiceOrder(saved);
+
+      // --- SYNC LOCAL INVENTORY STATE ---
+      setInventory(prev => {
+        return prev.map(inv => {
+          const itemInOrder = orderData.items.find(oi => oi.name === inv.name);
+          if (itemInOrder) {
+            return { ...inv, stock: Math.max(0, inv.stock - itemInOrder.quantity) };
+          }
+          return inv;
+        });
+      });
+
       // ← Table cleared ONLY here, after successful DB save
       if (due === 0) clearTable(activeTableId);
       else setTableField(activeTableId, 'dueAmount', due);
@@ -452,7 +487,7 @@ export function AppProvider({ children }) {
       console.error('Generate bill error:', err);
       return { error: err.message || 'Failed to generate bill' };
     }
-  }, [tableBills, activeTableId, orderHistory, billTotals, clearTable, setTableField]);
+  }, [tableBills, activeTableId, orderHistory, billTotals, clearTable, setTableField, setInventory]);
 
   // ── Menu CRUD ────────────────────────────────────────────────────
   const saveMenuItem = useCallback(async (data, id) => {
@@ -536,7 +571,10 @@ export function AppProvider({ children }) {
       settings, saveSettings,
       activeSection, setActiveSection,
       sidebarOpen, setSidebarOpen,
-      menuItems, orderHistory, workers,
+      menuItems, setMenuItems,
+      orderHistory, setOrderHistory,
+      workers, setWorkers,
+      inventory, setInventory,
       loading, error, loadData,
       tableBills, activeTableId, selectTable,
       updateTableItem, clearTable, setTableField,
