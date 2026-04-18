@@ -9,11 +9,15 @@ Engineered with <b>enterprise-level architecture, atomic data integrity, and mod
 
 <hr/>
 
-<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/1594da58-5a05-4d37-9dbd-b36255a9597a" />
-<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/13e80c05-75ef-442a-8c5d-aadaabde5a87" />
-<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/f61f5527-2164-4af4-90c0-4caca78f3c43" />
-<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/6640c4b4-7817-4cee-bb2e-3f0b77f40d16" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1594da58-5a05-4d37-9dbd-b36255a9597a" width="45%" />
+  <img src="https://github.com/user-attachments/assets/13e80c05-75ef-442a-8c5d-aadaabde5a87" width="45%" />
+</p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f61f5527-2164-4af4-90c0-4caca78f3c43" width="45%" />
+  <img src="https://github.com/user-attachments/assets/6640c4b4-7817-4cee-bb2e-3f0b77f40d16" width="45%" />
+</p>
 <h2>System Overview</h2>
 <p>
 HumTum POS V2.1 introduces a strict separation architecture, high-performance billing, and role-secured operations,
