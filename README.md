@@ -98,7 +98,7 @@ A complete <b>End-to-End (E2E) + Stress Testing Audit</b> was conducted to valid
 <tr>
 <td><b>E2E Order Flow</b></td>
 <td><nobr>PASS</td>
-<td>Full cycle tested (Login → Order → Billing → Settlement → Stock Update)</td>
+<td>Full cycle tested (Order → Billing → Settlement → Stock Update)</td>
 </tr>
 
 <tr>
@@ -120,7 +120,7 @@ A complete <b>End-to-End (E2E) + Stress Testing Audit</b> was conducted to valid
 </tr>
 
 <tr>
-<td><b>Concurrency Stress Test</b></td>
+<td><b>Stress Test</b></td>
 <td><nobr>PASS</td>
 <td>Handled 100+ parallel orders without failure</td>
 </tr>
