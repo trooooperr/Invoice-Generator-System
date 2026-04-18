@@ -93,49 +93,49 @@ A complete <b>End-to-End (E2E) + Stress Testing Audit</b> was conducted to valid
 
 <tr>
 <td><b>E2E Order Flow</b></td>
-<td>✅ PASS </td>
+<td>✅PASS </td>
 <td>Full cycle tested (Login → Order → Billing → Settlement → Stock Update)</td>
 </tr>
 
 <tr>
 <td><b>Authentication & RBAC</b></td>
-<td>✅ PASS </td>
+<td>✅PASS </td>
 <td>Role restrictions verified (Manager blocked from Admin actions)</td>
 </tr>
 
 <tr>
 <td><b>Inventory Consistency</b></td>
-<td>✅ PASS </td>
+<td>✅PASS </td>
 <td>No stock mismatch under concurrent billing</td>
 </tr>
 
 <tr>
 <td><b>Atomic Operations</b></td>
-<td>✅ PASS  </td>
+<td>✅PASS </td>
 <td>Redis bill generation + MongoDB bulkWrite verified</td>
 </tr>
 
 <tr>
 <td><b>Concurrency Stress Test</b></td>
-<td>✅ PASS </td>
+<td>✅PASS </td>
 <td>Handled 100+ parallel orders without failure</td>
 </tr>
 
 <tr>
 <td><b>Load Testing</b></td>
-<td>✅ PASS </td>
+<td>✅PASS </td>
 <td>Simulated 7,500 virtual users using Artillery</td>
 </tr>
 
 <tr>
 <td><b>Latency Benchmark</b></td>
-<td>✅ PASS </td>
+<td>✅PASS </td>
 <td>Average response time maintained under high load</td>
 </tr>
 
 <tr>
 <td><b>UI Stability</b></td>
-<td>✅ PASS </td>
+<td>✅PASS </td>
 <td>No UI crashes or lag during rapid billing</td>
 </tr>
 
