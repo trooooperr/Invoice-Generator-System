@@ -9,10 +9,10 @@ Engineered with <b>enterprise-level architecture, atomic data integrity, and mod
 
 <hr/>
 
-<img width="1416" height="844" alt="image" src="https://github.com/user-attachments/assets/1594da58-5a05-4d37-9dbd-b36255a9597a" />
-<img width="1416" height="844" alt="image" src="https://github.com/user-attachments/assets/13e80c05-75ef-442a-8c5d-aadaabde5a87" />
-<img width="1416" height="836" alt="image" src="https://github.com/user-attachments/assets/f61f5527-2164-4af4-90c0-4caca78f3c43" />
-<img width="1416" height="845" alt="image" src="https://github.com/user-attachments/assets/6640c4b4-7817-4cee-bb2e-3f0b77f40d16" />
+<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/1594da58-5a05-4d37-9dbd-b36255a9597a" />
+<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/13e80c05-75ef-442a-8c5d-aadaabde5a87" />
+<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/f61f5527-2164-4af4-90c0-4caca78f3c43" />
+<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/6640c4b4-7817-4cee-bb2e-3f0b77f40d16" />
 
 <h2>System Overview</h2>
 <p>
