@@ -53,7 +53,7 @@ making it suitable for real-world restaurant environments with high concurrency.
 
 <hr/>
 
-<h2>⚡ Key Production Features</h2>
+<h2>Key Production Features</h2>
 
 <ul>
 <li><b>Atomic Bill Numbering:</b> Redis INCR (no duplicates)</li>
@@ -150,7 +150,7 @@ A complete <b>End-to-End (E2E) + Stress Testing Audit</b> was conducted to valid
 
 <hr/>
 
-<h2>🛠️ Tech Stack</h2>
+<h2>Tech Stack</h2>
 
 <ul>
 <li><b>Frontend:</b> React 18, Vite</li>
@@ -180,7 +180,7 @@ VITE_API_URL=
 
 <hr/>
 
-<h2>💻 Local Development</h2>
+<h2>Local Development</h2>
 
 <pre>
 npm install
