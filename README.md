@@ -88,58 +88,58 @@ making it suitable for real-world restaurant environments with high concurrency.
 A complete <b>End-to-End (E2E) + Stress Testing Audit</b> was conducted to validate production readiness.
 </p>
 
-<table style="width:100%; border-collapse: collapse;">
+<table width="100%">
 <tr>
-  <th style="width:30%;">Test Category</th>
-  <th style="width:15%; white-space: nowrap;">Status</th>
-  <th style="width:55%;">Description</th>
+  <th align="left">Test Category</th>
+  <th align="left">Status</th>
+  <th align="left">Description</th>
 </tr>
 
 <tr>
 <td><b>E2E Order Flow</b></td>
-<td style="white-space: nowrap;">✅ PASS</td>
+<td><nobr>PASS ✅</nobr></td>
 <td>Full cycle tested (Login → Order → Billing → Settlement → Stock Update)</td>
 </tr>
 
 <tr>
 <td><b>Authentication & RBAC</b></td>
-<td style="white-space: nowrap;">✅ PASS</td>
+<td><nobr>PASS ✅</nobr></td>
 <td>Role restrictions verified (Manager blocked from Admin actions)</td>
 </tr>
 
 <tr>
 <td><b>Inventory Consistency</b></td>
-<td style="white-space: nowrap;">✅ PASS</td>
+<td><nobr>PASS ✅</nobr></td>
 <td>No stock mismatch under concurrent billing</td>
 </tr>
 
 <tr>
 <td><b>Atomic Operations</b></td>
-<td style="white-space: nowrap;">✅ PASS</td>
+<td><nobr>PASS ✅</nobr></td>
 <td>Redis bill generation + MongoDB bulkWrite verified</td>
 </tr>
 
 <tr>
 <td><b>Concurrency Stress Test</b></td>
-<td style="white-space: nowrap;">✅ PASS</td>
+<td><nobr>PASS ✅</nobr></td>
 <td>Handled 100+ parallel orders without failure</td>
 </tr>
 
 <tr>
 <td><b>Load Testing</b></td>
-<td style="white-space: nowrap;">✅ PASS</td>
+<td><nobr>PASS ✅</nobr></td>
 <td>Simulated 7,500 virtual users using Artillery</td>
 </tr>
 
 <tr>
 <td><b>Latency Benchmark</b></td>
-<td style="white-space: nowrap;">✅ PASS</td>
+<td><nobr>PASS ✅</nobr></td>
 <td>Average response time maintained under high load</td>
 </tr>
 
 <tr>
 <td><b>UI Stability</b></td>
-<td style="white-space: nowrap;">✅ PASS</td>
+<td><nobr>PASS ✅</nobr></td>
 <td>No UI crashes or lag during rapid billing</td>
 </tr>
 
