@@ -127,12 +127,12 @@ export default function SettingsPage() {
   };
 
   // Inventory category state
-  const [invCategories, setInvCategories] = useState([]);
+  const [invCategories, setInvCategories] = useState(Array.isArray(settings.inventoryCategories) ? settings.inventoryCategories : []);
   const [invCatInput, setInvCatInput] = useState('');
   const [invCatEdit, setInvCatEdit] = useState(null); // {old, new}
   const [invCatError, setInvCatError] = useState('');
   // Menu category state
-  const [menuCategories, setMenuCategories] = useState([]);
+  const [menuCategories, setMenuCategories] = useState(Array.isArray(settings.menuCategories) ? settings.menuCategories : []);
   const [menuCatInput, setMenuCatInput] = useState('');
   const [menuCatEdit, setMenuCatEdit] = useState(null); // {old, new}
   const [menuCatError, setMenuCatError] = useState('');
@@ -140,6 +140,8 @@ export default function SettingsPage() {
   // Load categories from backend
   useEffect(() => {
     setForm({ ...settings });
+    setInvCategories(Array.isArray(settings.inventoryCategories) ? settings.inventoryCategories : []);
+    setMenuCategories(Array.isArray(settings.menuCategories) ? settings.menuCategories : []);
   }, [settings]);
 
   useEffect(() => {
