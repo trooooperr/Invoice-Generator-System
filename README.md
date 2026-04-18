@@ -93,19 +93,19 @@ A complete <b>End-to-End (E2E) + Stress Testing Audit</b> was conducted to valid
 
 <tr>
 <td><b>E2E Order Flow</b></td>
-<td>✅PASS </td>
+<td>✅ PASS   </td>
 <td>Full cycle tested (Login → Order → Billing → Settlement → Stock Update)</td>
 </tr>
 
 <tr>
 <td><b>Authentication & RBAC</b></td>
-<td>✅PASS </td>
+<td>✅ PASS   </td>
 <td>Role restrictions verified (Manager blocked from Admin actions)</td>
 </tr>
 
 <tr>
 <td><b>Inventory Consistency</b></td>
-<td>✅PASS </td>
+<td>✅ PASS   </td>
 <td>No stock mismatch under concurrent billing</td>
 </tr>
 
