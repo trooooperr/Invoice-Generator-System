@@ -277,9 +277,10 @@ ${s.thankYouMsg}
 
       <style>{`
         .invoice-premium-modal {
-          width: 95%; max-width: 350px; height: 94vh; 
+          width: 100% !important; max-width: 400px; 
           display: flex; flex-direction: column; background: #08090a; 
           border: 1px solid #1c1e21; border-radius: 28px; padding: 0 !important; overflow: hidden;
+          margin: 10px;
         }
 
         .inv-m-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid #1c1e21; }

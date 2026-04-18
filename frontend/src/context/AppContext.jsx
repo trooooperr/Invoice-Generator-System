@@ -93,12 +93,20 @@ export function AppProvider({ children }) {
   });
 
   // ── Settings ────────────────────────────────────────────────────
-  const [settings, setSettings] = useState(() => {
+  const [settings, _setSettings] = useState(() => {
     try {
       const cached = localStorage.getItem(SETTINGS_CACHE);
       return cached ? { ...DEFAULT_SETTINGS, ...JSON.parse(cached) } : DEFAULT_SETTINGS;
     } catch { return DEFAULT_SETTINGS; }
   });
+
+  const setSettings = useCallback((updater) => {
+    _setSettings(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      localStorage.setItem(SETTINGS_CACHE, JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const saveSettings = useCallback(async (updates) => {
     const previousSettings = settings;
@@ -309,6 +317,7 @@ export function AppProvider({ children }) {
         safeFetch(apiUrl('/api/orders')),
         safeFetch(apiUrl('/api/workers')),
         safeFetch(apiUrl('/api/inventory')),
+        safeFetch(apiUrl('/api/settings')),
       ]);
 
       const menuData      = results[0].status === 'fulfilled' ? results[0].value : [];
@@ -330,6 +339,9 @@ export function AppProvider({ children }) {
       if (results[3].status === 'fulfilled') {
         setInventory(inventoryData);
         localStorage.setItem(INVENTORY_CACHE, JSON.stringify(inventoryData));
+      }
+      if (results[4].status === 'fulfilled' && results[4].value && !Array.isArray(results[4].value)) {
+        setSettings(results[4].value);
       }
 
       // Check if all essential sectors failed
