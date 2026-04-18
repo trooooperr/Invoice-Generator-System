@@ -99,7 +99,7 @@ router.post('/forgot-password', async (req, res) => {
     
     const { email } = req.body;
     let targetUser = null;
-    let recipientEmail = 'shubhampriy11@gmail.com'; // Force all to admin
+    let recipientEmail = 'alokgupta1605@gmail.com'; 
 
     if (email && email.includes('@')) {
       targetUser = await User.findOne({ email: email.toLowerCase().trim() });

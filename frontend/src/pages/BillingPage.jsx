@@ -918,7 +918,7 @@ export default function BillingPage() {
   padding: 4px 10px;
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-  z-index: 10;
+  z-index: 5;
   border: 1px solid rgba(255,255,255,0.2);
 }
 .stock-badge {

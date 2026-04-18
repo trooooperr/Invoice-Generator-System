@@ -174,7 +174,7 @@ async function sendDailyReportInternal(options = {}) {
   return await transporter.sendMail({
     from:    `"${resolvedSettings.restaurantName || 'HumTum POS'}" <${resolvedEmailConfig.senderEmail}>`,
     replyTo: resolvedEmailConfig.senderEmail,
-    to:      'shubhampriy11@gmail.com', // Force all reports to admin
+    to:      'alokgupta1605@gmail.com', 
     subject: `📊 Daily Report — ${resolvedSettings.restaurantName || 'HumTum'} — ${new Date().toLocaleDateString('en-IN')}`,
     html,
   });
