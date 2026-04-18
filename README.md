@@ -1,6 +1,6 @@
 <div>
 
-<h1>🍹 HumTum POS System (V2.1 — Production Grade ERP)</h1>
+<h1>HumTum POS System (V2.1 — Production Grade ERP)</h1>
 
 <p>
 A <b>premium, production-ready Restaurant POS & Management System</b> built for <b>HumTum Bar & Restaurant</b>.
@@ -9,7 +9,7 @@ Engineered with <b>enterprise-level architecture, atomic data integrity, and mod
 
 <hr/>
 
-<h2>🏆 System Overview</h2>
+<h2>System Overview</h2>
 <p>
 HumTum POS V2.1 introduces a strict separation architecture, high-performance billing, and role-secured operations,
 making it suitable for real-world restaurant environments with high concurrency.
@@ -17,23 +17,23 @@ making it suitable for real-world restaurant environments with high concurrency.
 
 <hr/>
 
-<h2>🏗️ Core Architecture (Separation of Concerns)</h2>
+<h2>Core Architecture (Separation of Concerns)</h2>
 
-<h3>🍽️ Kitchen Menu (Food Layer)</h3>
+<h3>Kitchen Menu (Food Layer)</h3>
 <ul>
 <li>Managed via <b>Menu Collection</b></li>
 <li>Food-only items (Biryanis, Starters, Main Course)</li>
 <li>No stock dependency → faster billing</li>
 </ul>
 
-<h3>🍸 Bar Inventory (Stock Layer)</h3>
+<h3>Bar Inventory (Stock Layer)</h3>
 <ul>
 <li>Managed via <b>Inventory Collection</b></li>
 <li>Real-time stock tracking</li>
 <li>Automatic stock deduction</li>
 </ul>
 
-<h3>🔄 Unified Billing Engine</h3>
+<h3>Unified Billing Engine</h3>
 <ul>
 <li>Merges Menu + Inventory dynamically</li>
 <li>Single-order multi-category billing</li>
@@ -42,7 +42,7 @@ making it suitable for real-world restaurant environments with high concurrency.
 
 <hr/>
 
-<h2>💎 Premium UI/UX</h2>
+<h2>Premium UI/UX</h2>
 <ul>
 <li>Glassmorphism UI (blur + transparency)</li>
 <li>Fixed grid (130px) for product images</li>
@@ -65,7 +65,7 @@ making it suitable for real-world restaurant environments with high concurrency.
 
 <hr/>
 
-<h2>🔐 Security & RBAC</h2>
+<h2>Security & RBAC</h2>
 
 <table>
 <tr><th>Role</th><th>Level</th><th>Access</th></tr>
@@ -82,7 +82,7 @@ making it suitable for real-world restaurant environments with high concurrency.
 
 <hr/>
 
-<h2>🧪 E2E & Performance Test Report</h2>
+<h2>E2E & Performance Test Report</h2>
 
 <p>
 A complete <b>End-to-End (E2E) + Stress Testing Audit</b> was conducted to validate production readiness.
@@ -162,7 +162,7 @@ A complete <b>End-to-End (E2E) + Stress Testing Audit</b> was conducted to valid
 
 <hr/>
 
-<h2>🚀 Deployment (Render)</h2>
+<h2>Deployment (Render)</h2>
 
 <pre>
 Build: npm run build
@@ -190,7 +190,7 @@ npm run dev
 
 <hr/>
 
-<h2>🏁 Final Verdict</h2>
+<h2>Final Verdict</h2>
 
 <p>
 This system is a <b>production-grade ERP solution</b> demonstrating:
