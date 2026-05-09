@@ -279,7 +279,6 @@ export default function InventoryPage() {
                 </div>
               ) : (
                 <div className="invActions view-only-label" style={{ padding: '4px 0', fontSize: 11, color: 'var(--t3)', fontStyle: 'italic' }}>
-                  Read-only Access
                 </div>
               )}
 
